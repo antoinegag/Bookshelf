@@ -19,8 +19,11 @@ export default function Home({ user, currentlyReading }: Props) {
     user: { id, name, imageUrl },
   } = user;
   return (
-    <div>
-      <h1>Hello, {name}</h1>
+    <div className="bg-gray-100 min-h-screen">
+      <div className="text-center">
+        <h1 className="text-3xl">{name}'s</h1>
+        <div>bookshelf</div>
+      </div>
       <div>
         <img src={imageUrl} />
       </div>
