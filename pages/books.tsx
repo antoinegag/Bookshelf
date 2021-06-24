@@ -4,36 +4,43 @@ import { useHelper } from "@react-three/drei";
 import { Canvas, useFrame, useThree, extend } from "@react-three/fiber";
 import * as THREE from "three";
 
-function Book(props) {
-  const { coverUrl } = props;
-  // This reference will give us direct access to the mesh
+function Book({ coverUrl, position }) {
   const mesh = useRef();
-  // Set up state for the hovered and active state
+
   const [hovered, setHover] = useState(false);
   const [active, setActive] = useState(false);
-  const rotationSpeed = 0.07;
+  const [cameraVerticalPosition, setCameraVerticalPosition] = useState(0); // Used to smooth panning
+
+  const rotationSpeed = 0.01;
   const translationSpeed = 0.05;
+  const baseRotation = 1.55;
+
+  const {
+    camera,
+    gl: { domElement },
+  } = useThree();
+
   // Rotate mesh every frame, this is outside of React without overhead
   useFrame(() => {
     if (mesh.current != null) {
       const angle = mesh.current.rotation.y;
-      const yPosition = mesh.current.position.z;
+      const yPosition = mesh.current.position.y;
 
       if (active) {
-        mesh.current.rotation.y = Math.min(angle + rotationSpeed, 2);
-
-        mesh.current.position.z = Math.min(yPosition + translationSpeed, 1);
-        return;
-      } else {
-        mesh.current.position.z = Math.max(yPosition - translationSpeed, 0);
+        console.log(position);
+        camera.position.x = position[0];
+        new THREE.Vector3(position[0], position[1], position[2]);
       }
 
       if (hovered) {
-        mesh.current.rotation.y = Math.min(angle + rotationSpeed, 2);
-        mesh.current.position.z = Math.min(yPosition + translationSpeed, 1);
+        mesh.current.rotation.y = Math.min(
+          angle + rotationSpeed,
+          baseRotation - 0.3
+        );
+        mesh.current.position.y = Math.min(yPosition + translationSpeed, 0.1);
       } else {
-        mesh.current.rotation.y = Math.max(angle - rotationSpeed, 0);
-        mesh.current.position.z = Math.max(yPosition - translationSpeed, 0);
+        mesh.current.rotation.y = Math.max(angle - rotationSpeed, baseRotation);
+        mesh.current.position.y = Math.max(yPosition - translationSpeed, 0);
       }
     }
   });
@@ -51,9 +58,9 @@ function Book(props) {
   return (
     <>
       <mesh
-        {...props}
+        position={position}
         ref={mesh}
-        scale={active ? 1.5 : 1}
+        rotation={[0, baseRotation, 0]}
         onClick={(e) => setActive(!active)}
         onPointerOver={(e) => setHover(true)}
         onPointerOut={(e) => setHover(false)}
@@ -65,10 +72,6 @@ function Book(props) {
         <meshStandardMaterial attachArray="material" />
         <meshStandardMaterial color="#404040" attachArray="material" />
         <meshStandardMaterial attachArray="material" />
-      </mesh>
-      <mesh>
-        <textGeometry attach="geometry" args={["three.js", textOptions]} />
-        <meshStandardMaterial attach="material" />
       </mesh>
     </>
   );
@@ -82,6 +85,8 @@ const CameraControls = () => {
     camera,
     gl: { domElement },
   } = useThree();
+
+  camera.lookAt(new THREE.Vector3(1, 10, 1));
 
   // Ref to the controls, so that we can update them on every frame using useFrame
   const controls = useRef();
@@ -98,7 +103,7 @@ const CameraControls = () => {
 function BookShelf() {
   return (
     <Canvas className="min-h-screen">
-      <CameraControls />
+      {/* <CameraControls /> */}
       <ambientLight intensity={0.5} />
       <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} />
       <pointLight position={[-10, -10, -10]} />
@@ -107,15 +112,15 @@ function BookShelf() {
         coverUrl="https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1364251156l/1307582.jpg"
       />
       <Book
-        position={[0.2, 0, 0]}
+        position={[0.8, 0, 0]}
         coverUrl="https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1364251156l/1307582.jpg"
       />
       <Book
-        position={[0.4, 0, 0]}
+        position={[1.6, 0, 0]}
         coverUrl="https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1364251156l/1307582.jpg"
       />
       <Book
-        position={[0.6, 0, 0]}
+        position={[2.4, 0, 0]}
         coverUrl="https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1364251156l/1307582.jpg"
       />
     </Canvas>
