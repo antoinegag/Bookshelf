@@ -1,6 +1,10 @@
 // @ts-nocheck
+import {
+  BookEntry,
+  getCachedBookshelf,
+  getCachedUserData,
+} from "../lib/scrapper/GoodReads";
 import React, { useRef, useState, useMemo } from "react";
-import { useHelper } from "@react-three/drei";
 import { Canvas, useFrame, useThree, extend } from "@react-three/fiber";
 import * as THREE from "three";
 
@@ -134,3 +138,20 @@ export default function Books() {
     </div>
   );
 }
+
+export const getStaticProps: GetStaticProps = async (context) => {
+  const userId = "131654245-antoine";
+  const userData = await getCachedUserData(userId);
+  const readingBookshelfUrl = userData?.bookshelves["currently-reading‎"];
+  let currentlyReadingBooks: BookEntry[] = [];
+  if (readingBookshelfUrl) {
+    currentlyReadingBooks = await getCachedBookshelf(readingBookshelfUrl);
+  }
+
+  return {
+    props: {
+      user: userData,
+      currentlyReading: currentlyReadingBooks,
+    },
+  };
+};

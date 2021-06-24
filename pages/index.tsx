@@ -1,12 +1,9 @@
 import { GetStaticProps } from "next";
-import { load } from "cheerio";
 import {
   BookEntry,
-  getBookshelfBooks,
-  getUserData,
+  getCachedBookshelf,
+  getCachedUserData,
   GoodReadsUserData,
-  loadUserPage,
-  makeAbsoluteGoodReadsUrl,
 } from "../lib/scrapper/GoodReads";
 
 interface Props {
@@ -47,11 +44,11 @@ export default function Home({ user, currentlyReading }: Props) {
 
 export const getStaticProps: GetStaticProps = async (context) => {
   const userId = "131654245-antoine";
-  const userData = await getUserData(userId);
+  const userData = await getCachedUserData(userId);
   const readingBookshelfUrl = userData?.bookshelves["currently-reading‎"];
   let currentlyReadingBooks: BookEntry[] = [];
   if (readingBookshelfUrl) {
-    currentlyReadingBooks = await getBookshelfBooks(readingBookshelfUrl);
+    currentlyReadingBooks = await getCachedBookshelf(readingBookshelfUrl);
   }
 
   return {

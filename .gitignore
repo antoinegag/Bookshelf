@@ -33,3 +33,6 @@ yarn-error.log*
 
 # vercel
 .vercel
+
+# Build time cache
+.bookcache

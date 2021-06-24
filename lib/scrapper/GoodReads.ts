@@ -1,4 +1,5 @@
 import { load } from "cheerio";
+import { CachedResource, readJSON, resourceExists, writeJSON } from "./Cache";
 import { fetchText, makeAbsoluteUrl } from "./Web";
 
 export function makeAbsoluteGoodReadsUrl(relativeUrl: string) {
@@ -39,13 +40,31 @@ export interface BookEntry {
   };
 }
 
+export async function getCachedBookshelf(bookshelfUrl: string) {
+  const resource: CachedResource = {
+    type: "shelf",
+    id: bookshelfUrl,
+  };
+
+  if (resourceExists(resource)) {
+    console.log("Bookshelf cache hit");
+    return readJSON(resource);
+  }
+
+  const data = await getBookshelfBooks(bookshelfUrl);
+
+  writeJSON(resource, data);
+
+  return data;
+}
+
 export async function getBookshelfBooks(
   bookshelfUrl: string
 ): Promise<BookEntry[]> {
   const pageText = await fetchText(bookshelfUrl);
   if (pageText) {
     const pageData = load(pageText)("#booksBody > tr");
-    const books = pageData.toArray().map((book) => {
+    const books = pageData.toArray().reduce<BookEntry[]>((books, book) => {
       const bookData = load(book);
       const coverUrl = bookData(".field.cover img").attr("src");
 
@@ -59,7 +78,7 @@ export async function getBookshelfBooks(
       const authorUrl = makeAbsoluteGoodReadsUrl(author.attr("href")!);
 
       if (coverUrl && titleText && authorText && authorUrl) {
-        return {
+        books.push({
           book: {
             coverUrl,
             title: titleText,
@@ -69,14 +88,33 @@ export async function getBookshelfBooks(
             name: authorText,
             url: authorUrl,
           },
-        };
+        });
       }
-    });
+
+      return books;
+    }, []);
 
     return books;
   }
 
   return [];
+}
+
+export async function getCachedUserData(userId: string) {
+  const resource: CachedResource = {
+    type: "user",
+    id: userId,
+  };
+
+  if (resourceExists(resource)) {
+    console.log("User cache hit");
+    return readJSON(resource);
+  }
+
+  const data = await getUserData(userId);
+  writeJSON(resource, data);
+
+  return data;
 }
 
 export async function getUserData(userId: string) {
