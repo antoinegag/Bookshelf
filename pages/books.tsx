@@ -117,11 +117,11 @@ function BookShelf() {
       />
       <Book
         position={[0.8, 0, 0]}
-        coverUrl="https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1364251156l/1307582.jpg"
+        coverUrl="https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1387770614l/17290807.jpg"
       />
       <Book
         position={[1.6, 0, 0]}
-        coverUrl="https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1364251156l/1307582.jpg"
+        coverUrl="https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1421139927l/23719262.jpg"
       />
       <Book
         position={[2.4, 0, 0]}
